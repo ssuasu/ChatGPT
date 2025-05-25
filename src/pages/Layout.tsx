@@ -19,6 +19,11 @@ const Main = styled.div<{ isSidebarOpen: boolean }>`
     width: 100%;
     margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '260px' : '0')};
     transition: margin-left 0.3s ease;
+
+    //창 크기 작아지면 화면 다 차지.
+    @media (max-width: 768px) {
+    margin-left: 0;
+  }
 `
 
 export default function Layout(){

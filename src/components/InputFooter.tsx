@@ -1,13 +1,14 @@
 import styled from 'styled-components'
 import Button from './common/Buttons'
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef} from 'react';
 import { Plus, Globe, Lightbulb, Telescope, Brush, Ellipsis, Mic, AudioLines} from 'lucide-react'
-import debounce from 'lodash.debounce'
 import { useNavigate } from 'react-router-dom';
 
 import { saveMessage } from '../utils/storage';
 import { callGemini } from '../utils/gemini';
 import { useSessionStore } from '../store/sessionStore';
+
+//@media
 
 export const ICON_SIZE = 17;
 const LINE_HEIGHT = 25;
@@ -38,12 +39,13 @@ const ButtonPosition = styled.div`
 `
 
 const commonProcs = {
-  border: '1px solid #ccc',
+  border: true,
   borderRadius: "999px",
   hoverColor: "#e0e0e0",
   opacity:0.6,
   fontsize: "13px",
 };
+
 
 //
 
@@ -65,12 +67,12 @@ export default function InputFooter({ sessionId, onUpdate }: { sessionId: string
         onClick: () => {setPlaceholder("무엇이든 부탁하세요")},
     },{
         icon : <Telescope size={ICON_SIZE}/>,
-        label: "심층 리서치",
+        label: "심층리서치",
         description: "디테일한 보고서를 작성하세요",
         onClick: () => {setPlaceholder("디테일한 보고서를 작성하세요")},
     },{
         icon : <Brush size={ICON_SIZE}/>,
-        label: "이미지 그리기",
+        label:"이미지 그리기",
         description: "무엇이든 시각화하세요",
         onClick: () => {console.log('Brush clicked')},
     },{
@@ -80,7 +82,7 @@ export default function InputFooter({ sessionId, onUpdate }: { sessionId: string
     },
 ]
     const [placeholder, setPlaceholder] = useState("무엇이든 물어보세요");
-    const [showLabel, setShowLabel] = useState(true);
+    //const [showLabel, setShowLabel] = useState(true);
     const [input, setInput] =useState('');  //입력처리
 
     //자동높이조절 textarea 만들기
@@ -129,7 +131,7 @@ export default function InputFooter({ sessionId, onUpdate }: { sessionId: string
   }
 
   
-
+  /* 윈도우 창 조절.
     useEffect(() => {
         const updateLabelVisibility = () => {
             requestAnimationFrame(() => {
@@ -156,7 +158,7 @@ export default function InputFooter({ sessionId, onUpdate }: { sessionId: string
             window.removeEventListener('resize', debouncedUpdate);
 
         };
-    }, []);
+    }, []);*/
 
 
 
@@ -193,7 +195,7 @@ export default function InputFooter({ sessionId, onUpdate }: { sessionId: string
             <ButtonPosition>
                 <div ref={leftGroupRef} style={{}}>
                 {buttonGroup1.map((btn, i)=>{
-                    return <Button key={i} {...commonProcs} {...btn} label={showLabel ? btn.label : undefined} />
+                    return <Button key={i} {...commonProcs} {...btn}/>
                 })}
                 </div>
 

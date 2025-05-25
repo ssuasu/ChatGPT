@@ -18,6 +18,11 @@ const Sidebar = styled.div<{ isOpen: boolean }>`
   position: fixed;
   transform: ${({ isOpen }) => (isOpen ? 'translateX(0)' : 'translateX(-100%)')};
   transition: transform 0.3s ease;
+
+  @media (max-width: 768px) {
+    box-shadow: ${({ isOpen }) => (isOpen ? '0 0 30px -10px' : '0')};
+    z-index: 1000;
+  }
 `;
 
 //버튼 세로 정렬
@@ -89,12 +94,6 @@ const ScrollArea = styled.div`
 
 const Inventory = ({ onSelect }: { onSelect: (id: string) => void })=> {
   const sessions = useSessionStore((state) => state.sessions);
-  const createSession = useSessionStore((state) => state.createSession);
-
-  const handleCreate = () => {
-    createSession(onSelect);
-  };
-
 
   const mainButtons = [
     {

@@ -59,7 +59,11 @@ export default function Conversation(){
     const [messages, setMessages] = useState<Message[]>([]);
 
     useEffect(() => {
-        setMessages(getMessages(sessionId!));
+        if (!sessionId) {
+        setMessages([]);
+        } else {
+            setMessages(getMessages(sessionId));
+        }
     }, [sessionId]);
 
 

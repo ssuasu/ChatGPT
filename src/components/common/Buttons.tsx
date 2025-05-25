@@ -87,6 +87,11 @@ const StyledButton = styled.button<{
     outline: none; 
   }
 `;
+const Label = styled.span`
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
 
 // --- 컴포넌트 ---
 const Button: React.FC<ButtonProps> = ({
@@ -117,7 +122,7 @@ const Button: React.FC<ButtonProps> = ({
         fontsize={fontsize}
       >
         {icon}
-        {label && <span>{label}</span>}
+        {label && <Label>{label}</Label>}
       </StyledButton>
     </ButtonWrapper>
   );
