@@ -4,9 +4,7 @@ import styled from 'styled-components'
 import {useEffect, useState} from "react"
 import { useSidebarStore } from '../../store/buttonfunctions'
 import { useModal } from '../../contexts/ModalContext';
-import { useSessionStore } from '../../store/sessionStore';
-//import { addSession } from '../../utils/storage';
-//import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 
 //양쪽에 배치
 const ButtonPosition = styled.div`
@@ -18,11 +16,10 @@ const ButtonPosition = styled.div`
     align-items:center;
 `
 
-export default function Header({ onSelect }: { onSelect: (id: string) => void }) {
-  //const navigate = useNavigate();
+export default function Header() {
   const toggleSidebar = useSidebarStore(state => state.toggle);
   const { openModal } = useModal();
-  const createSession = useSessionStore(state => state.createSession);
+  const navigate = useNavigate();
 
   const [isNarrow, setIsNarrow] = useState(() => {
     const screenHalf = 290;
@@ -31,7 +28,6 @@ export default function Header({ onSelect }: { onSelect: (id: string) => void })
 
   useEffect(() => {
     const checkWidth = () => {
-      //const screenHalf = window.outerWidth / 2;
       setIsNarrow(window.innerWidth < 290);
     };
 
@@ -69,7 +65,7 @@ export default function Header({ onSelect }: { onSelect: (id: string) => void })
       description="새 채팅"
       onClick={
         () => {console.log("newnote click\n");
-        createSession(onSelect);          
+        navigate('/');          
       }}
       />
       </div>

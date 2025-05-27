@@ -5,7 +5,7 @@ import {useEffect, useState, useRef} from "react"
 import gpticon from '../assets/gpticon.svg'
 import { useSidebarStore } from '../store/buttonfunctions'
 import { BsStars } from "react-icons/bs";
-import { useSessionStore } from '../store/sessionStore';
+import { useNavigate } from 'react-router-dom'
 
 const DD_SIZE = 15;
 
@@ -67,13 +67,13 @@ ul {
   }
 `
 
-export default function Header({ onSelect }: { onSelect: (id: string) => void }) {
+export default function Header() {
 
   const toggleSidebar = useSidebarStore(state => state.toggle);
   const {isOpen} = useSidebarStore();
   const [openDropdown,setOpenDropdown] = useState<null | 'chatgpt' | 'profile'>(null);  //드롭다운 열기
   const ref = useRef<HTMLDivElement>(null); //바깥 클릭 시 드롭다운 닫으
-   const createSession = useSessionStore(state => state.createSession);
+  const navigate = useNavigate();
 
   const toggleDropdown = (type: 'chatgpt' | 'profile') => setOpenDropdown(prev => (prev === type ? null : type));
 
@@ -107,7 +107,7 @@ export default function Header({ onSelect }: { onSelect: (id: string) => void })
             description="새 채팅"
             onClick={
               () => {console.log("newnote click\n");
-              createSession(onSelect);}}
+              navigate('/');}}
             />
           </div>
           <Button

@@ -5,7 +5,8 @@ import styled from 'styled-components'
 import { Hexagon } from "lucide-react"
 import { useSessionStore } from "../../store/sessionStore"
 import { PiCirclesFour } from "react-icons/pi";
-//import { useNavigate } from "react-router-dom";
+import { getSummary } from "../../utils/storage"
+import { removeSession } from "../../utils/storage"
 
 
 const Sidebar = styled.div<{ isOpen: boolean }>`
@@ -20,7 +21,7 @@ const Sidebar = styled.div<{ isOpen: boolean }>`
   transition: transform 0.3s ease;
 
   @media (max-width: 768px) {
-    box-shadow: ${({ isOpen }) => (isOpen ? '0 0 30px -10px' : '0')};
+    box-shadow: ${({ isOpen }) => (isOpen ? '0 0 30px -10px gray' : '0')};
     z-index: 1000;
   }
 `;
@@ -57,6 +58,7 @@ const ListItem = styled.li`
   padding: 8px;
   cursor: pointer;
   border-radius: 8px;
+  font-size:14px;
   
 
   &:hover {
@@ -135,11 +137,23 @@ const Inventory = ({ onSelect }: { onSelect: (id: string) => void })=> {
       
       <div className="w-64 bg-gray-100 p-2">
         <List>
-          {sessions.map(id => (
-            <ListItem key={id} onClick={() => onSelect(id)}>
-              <>{id}</>
+          {sessions.map(id => {
+            const summary = getSummary(id) ?? '요약 없음';
+            return(
+            <ListItem key={id} onClick={() => onSelect(id)} style={{justifyContent:'space-between'}}>
+              <>{summary}</>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // 클릭 이벤트가 부모에게 전파되지 않도록
+                  removeSession(id);
+                  location.reload();   // 상태관리로 대체 가능
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700 hidden group-hover:inline"
+              >
+                ✕
+              </button>
             </ListItem>
-          ))}
+          );})}
         </List>
       </div>
     </>
@@ -177,7 +191,7 @@ export default function SideBar({isOpen, onSelect}:{isOpen:boolean, onSelect:(id
 
     return (
     <Sidebar isOpen={isOpen}>
-        <Header onSelect={onSelect}/>
+        <Header/>
         <ScrollArea>
           <Inventory onSelect={onSelect}/>
         </ScrollArea>

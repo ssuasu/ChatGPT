@@ -16,11 +16,6 @@ const Container = styled.div`
   min-width: 350px;
   margin: 0 auto; //수평 가운데 정렬.     
 `
-/*
-    box-sizing: border-box;
-    padding: 0 16px;    //좌우 여백 
-    */
-
 const MessageList = styled.div`
   display: flex;
   flex-direction: column;
@@ -47,7 +42,7 @@ const MessageBubble = styled.span<{ isUser: boolean }>`
 
 const FooterWrapper = styled.div`
   position: sticky;
-  bottom: 0;
+  bottom: 20px;
   background: inherit; // 배경색 통일
   padding: 12px 16px;
   z-index: 100;
@@ -78,6 +73,7 @@ export default function Conversation(){
                         </MessageBubble>
                     </MessageRow>
                 ))}
+                <div style={{ paddingBottom: "100px" }}></div>
             </MessageList>
             <FooterWrapper>
             <InputFooter sessionId={sessionId!} onUpdate={() => setMessages(getMessages(sessionId!))}/>

@@ -23,6 +23,7 @@ const Main = styled.div<{ isSidebarOpen: boolean }>`
     //창 크기 작아지면 화면 다 차지.
     @media (max-width: 768px) {
     margin-left: 0;
+    opacity: ${({ isSidebarOpen }) => (isSidebarOpen ? '0.6': '1')};
   }
 `
 
@@ -31,10 +32,17 @@ export default function Layout(){
     const {isOpen} = useSidebarStore();
     const navigate = useNavigate();
     const loadSessions = useSessionStore(state => state.loadSessions);
+    const sessions = useSessionStore((state) => state.sessions);
 
     useEffect(() => {
         loadSessions();
     }, []);
+
+    useEffect(() => {
+        if (sessions.length === 0) {
+            navigate('/');
+        }
+    }, [sessions]);
 
      // onSelect 구현: 노트(세션) 클릭 시 해당 경로로 이동
     function handleSelect(id: string) {
@@ -45,7 +53,7 @@ export default function Layout(){
         <Container>
             <SideBar isOpen={isOpen} onSelect={handleSelect}/>
             <Main isSidebarOpen={isOpen}>
-                <Header onSelect={handleSelect}/>
+                <Header/>
                 <Outlet/>
             </Main>
         </Container>

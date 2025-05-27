@@ -3,12 +3,11 @@ import Button from './common/Buttons'
 import React, { useState, useRef} from 'react';
 import { Plus, Globe, Lightbulb, Telescope, Brush, Ellipsis, Mic, AudioLines} from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
+import { FaStopCircle, FaArrowCircleUp } from "react-icons/fa";
 
-import { saveMessage } from '../utils/storage';
+import { saveMessage, saveSummary } from '../utils/storage';
 import { callGemini } from '../utils/gemini';
 import { useSessionStore } from '../store/sessionStore';
-
-//@media
 
 export const ICON_SIZE = 17;
 const LINE_HEIGHT = 25;
@@ -42,10 +41,15 @@ const commonProcs = {
   border: true,
   borderRadius: "999px",
   hoverColor: "#e0e0e0",
-  opacity:0.6,
+  opacity:0.7,
   fontsize: "13px",
 };
 
+const Label = styled.span`
+  @media (max-width: 700px) {
+    display: none;
+  }
+`
 
 //
 
@@ -57,22 +61,22 @@ export default function InputFooter({ sessionId, onUpdate }: { sessionId: string
         onClick:()=>{console.log("click plus image or files")}
     },{
         icon : <Globe size={ICON_SIZE}/>,
-        label: "검색",
+        label: <Label>검색</Label>,
         description: "웹에서 검색",
         onClick: () => {setPlaceholder("웹에서 검색")},
     },{
         icon : <Lightbulb size={ICON_SIZE}/>,
-        label: "이성",
+        label: <Label>이성</Label>,
         description: "응답 전에 생각하기",
         onClick: () => {setPlaceholder("무엇이든 부탁하세요")},
     },{
         icon : <Telescope size={ICON_SIZE}/>,
-        label: "심층리서치",
+        label: <Label>심층리서치</Label>,
         description: "디테일한 보고서를 작성하세요",
         onClick: () => {setPlaceholder("디테일한 보고서를 작성하세요")},
     },{
         icon : <Brush size={ICON_SIZE}/>,
-        label:"이미지 그리기",
+        label:<Label>이미지 그리기</Label>,
         description: "무엇이든 시각화하세요",
         onClick: () => {console.log('Brush clicked')},
     },{
@@ -89,7 +93,7 @@ export default function InputFooter({ sessionId, onUpdate }: { sessionId: string
     const textarea = useRef<HTMLTextAreaElement>(null);
     const leftGroupRef = useRef<HTMLDivElement>(null);
     const rightGroupRef = useRef<HTMLDivElement>(null);
-    const handleResizeHeight = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleResizeHeight = () => {
         const el = textarea.current;
         if (!el) return;
 
@@ -105,61 +109,43 @@ export default function InputFooter({ sessionId, onUpdate }: { sessionId: string
         el.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden';
     }
 
+    const [isTyping, setIsTyping] = useState(false);  // 사용자 입력 중 여부
+    const [isLoading, setIsLoading] = useState(false);  // AI 응답 대기 중 여부
     const navigate=useNavigate();
     const createSessionAsync = useSessionStore(state => state.createSessionAsync);
     //입력처리
+
+    
     async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const userText = input.trim();
-    if (!userText) return;
+        e.preventDefault();
+        const userText = input.trim();  //양쪽 공백 정리.
+        if (!userText) return;
 
-    let id = sessionId;
+        let id = sessionId;
 
-  // 새로운 세션이면 생성
-    if (!id) {
-        id = await createSessionAsync(); // 반드시 Promise<string>을 반환하도록 구현되어야 함
-        navigate(`/note/${id}`);
+    // 새로운 세션이면 생성
+        if (!id) {
+            navigate(`/note/${id}`);
+            id = await createSessionAsync();
+
+            
+            // Gemini 요약 처리
+            const summary = await callGemini(`다음 문장을 15글자 이내로 요약해줘: ${userText}`);
+            saveSummary(id, summary);
+            
+        }
+        //message 저장 처리
+        saveMessage(id, { role: 'user', text: userText });
+        onUpdate();  // 메시지 갱신용
+        setInput('');
+        setIsTyping(false);
+
+        setIsLoading(true);
+        const aiReply = await callGemini(userText);
+        saveMessage(id, { role: 'ai', text: aiReply });
+        onUpdate();
+        setIsLoading(false);
     }
-    //message 저장 처리
-    saveMessage(sessionId, { role: 'user', text: userText });
-    onUpdate();  // 메시지 갱신용
-    setInput('');
-
-    const aiReply = await callGemini(userText);
-    saveMessage(sessionId, { role: 'ai', text: aiReply });
-    onUpdate();
-  }
-
-  
-  /* 윈도우 창 조절.
-    useEffect(() => {
-        const updateLabelVisibility = () => {
-            requestAnimationFrame(() => {
-                if (!leftGroupRef.current || !rightGroupRef.current) return;
-
-                const leftRect = leftGroupRef.current.getBoundingClientRect();
-                const rightRect = rightGroupRef.current.getBoundingClientRect();
-
-                const gap = rightRect.left - leftRect.right;
-                console.log(gap);
-
-                const shouldShow = gap > 50;
-                setShowLabel(prev => (prev !== shouldShow ? shouldShow : prev));
-
-            });
-        };
-
-        const debouncedUpdate = debounce(updateLabelVisibility, 50); // debounce 시간은 상황에 따라 조절
-
-        window.addEventListener('resize', debouncedUpdate);
-        updateLabelVisibility();
-
-        return () => {
-            window.removeEventListener('resize', debouncedUpdate);
-
-        };
-    }, []);*/
-
 
 
     return (
@@ -169,8 +155,10 @@ export default function InputFooter({ sessionId, onUpdate }: { sessionId: string
             value={input}
             ref={textarea}  //얘 없으면 textarea.current가 null됨.
             onChange={(e) => {
-                setInput(e.target.value);
-                handleResizeHeight(e);
+                const value = e.target.value;
+                setInput(value);
+                setIsTyping(value.trim().length > 0);
+                handleResizeHeight();
             }}
             onKeyDown={(e) => {
                 if (e.key === 'Enter'&& !e.shiftKey){
@@ -208,7 +196,13 @@ export default function InputFooter({ sessionId, onUpdate }: { sessionId: string
                     />
                     <Button 
                     {...commonProcs}
-                    icon={<AudioLines size={ICON_SIZE}/>}
+                    icon={
+                        isLoading
+                            ? <FaStopCircle size={ICON_SIZE}/>
+                            : isTyping
+                                ? <FaArrowCircleUp size={ICON_SIZE}/>
+                                : <AudioLines size={ICON_SIZE}/>
+                    }
                     description='음성 모드 사용'
                     onClick={()=>{console.log('음성 모드\n')}}
                     />

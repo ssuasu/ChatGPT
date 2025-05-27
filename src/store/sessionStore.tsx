@@ -10,8 +10,8 @@ interface SessionState {
 }
 
 export const useSessionStore = create<SessionState>()(
-  persist(
-    (set, get) => ({
+  persist(  //새로고침, 앱 종료 돼도 데이터 유지.
+    (set) => ({
       sessions: [],
       loadSessions: () => {
         const sessions = getSessions();
@@ -21,7 +21,7 @@ export const useSessionStore = create<SessionState>()(
         const newId = crypto.randomUUID();
         addSession(newId);
         set((state: SessionState) => ({
-          sessions: [...state.sessions, newId],
+          sessions: [newId, ...state.sessions],
         }));
         onSelect(newId);
       },
@@ -29,7 +29,7 @@ export const useSessionStore = create<SessionState>()(
       const newId = crypto.randomUUID();
       addSession(newId);
       set((state) => ({
-        sessions: [...state.sessions, newId],
+        sessions: [newId, ...state.sessions],
       }));
       return newId;
     },

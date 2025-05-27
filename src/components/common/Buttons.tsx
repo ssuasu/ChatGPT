@@ -4,7 +4,7 @@ import styled from "styled-components";
 // --- Props 정의 ---
 interface ButtonProps {
   icon?: React.ReactNode;
-  label?: string;
+  label?: React.ReactNode;
   border?: boolean;
   borderRadius?: string;
   hoverColor?: string;
@@ -80,7 +80,6 @@ const StyledButton = styled.button<{
 
   &:hover {
     background-color: ${(props) => props.hoverColor};
-    border: 1px solid #ccc;
   }
 
   &:focus {
@@ -88,9 +87,7 @@ const StyledButton = styled.button<{
   }
 `;
 const Label = styled.span`
-  @media (max-width: 768px) {
-    display: none;
-  }
+
 `;
 
 // --- 컴포넌트 ---
